@@ -1,9 +1,11 @@
 package com.example.account.controllers;
 
+import com.example.account.dtos.AccountDTO;
 import com.example.account.entities.Account;
 import com.example.account.models.Customer;
 import com.example.account.proxies.CustomerProxy;
 import com.example.account.repositories.AccountRepository;
+import com.example.account.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,18 +15,19 @@ import java.util.List;
 
 @RestController
 public class Accountcontroller {
-    AccountRepository accountRepository;
+
+    AccountService accountService;
     CustomerProxy customerProxy;
     @Autowired
-    public Accountcontroller(AccountRepository accountRepository, CustomerProxy customerProxy) {
-        this.accountRepository = accountRepository;
+    public Accountcontroller(AccountService accountService, CustomerProxy customerProxy) {
+        this.accountService = accountService;
         this.customerProxy = customerProxy;
     }
 
     @GetMapping("/accounts")
-    public List<Account> getAllAccounts()
+    public List<AccountDTO> getAllAccounts()
     {
-        List<Account> accountList = accountRepository.findAll();
+        List<AccountDTO> accountList = accountService.findAll();
         accountList.forEach(account -> {
             Customer customer = customerProxy.getCustomerById(account.getCustomerId());
             account.setCustomer(customer);
@@ -33,14 +36,14 @@ public class Accountcontroller {
     }
 
     @GetMapping("/account/{id}")
-    public Account getAccountById(@PathVariable String id)
+    public AccountDTO getAccountById(@PathVariable String id)
     {
 
-        Account account = accountRepository.findById(id).orElse(null);
-        if (account == null)
+        AccountDTO accountDto = accountService.findById(id);
+        if (accountDto == null)
             return null;
-        Customer customer = customerProxy.getCustomerById(account.getCustomerId());
-        account.setCustomer(customer);
-        return account;
+        Customer customer = customerProxy.getCustomerById(accountDto.getCustomerId());
+        accountDto.setCustomer(customer);
+        return accountDto;
     }
 }
