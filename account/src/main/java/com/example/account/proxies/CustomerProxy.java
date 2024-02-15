@@ -33,5 +33,4 @@ public interface CustomerProxy {
         return List.of();
     }
 
-
 }
